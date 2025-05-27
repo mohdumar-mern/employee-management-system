@@ -1,0 +1,129 @@
+.dashboard-home {
+  color: #333;
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+  margin-top: 4rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.dashboard-heading {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  .avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .avatar-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    h1 {
+      color: #007bff;
+      font-size: 1.5rem;
+      margin: 0;
+    }
+
+    p {
+    
+      color: #6c757d;
+      font-size: 0.875rem;
+      margin: 0.25rem 0 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .mail-icon {
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+
+  .icon.primary {
+    color: #007bff;
+  }
+}
+
+.dashboard-subtext {
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+}
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .card {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    &.indigo {
+      background-color: #e0e7ff;
+
+      .icon {
+        color: #4f46e5;
+      }
+    }
+
+    &.green {
+      background-color: #d1fae5;
+
+      .icon {
+        color: #10b981;
+      }
+    }
+
+    &.yellow {
+      background-color: #fef9c3;
+
+      .icon {
+        color: #eab308;
+      }
+    }
+  }
+}

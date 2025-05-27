@@ -1,0 +1,57 @@
+// AddDepartment.scss
+
+.uppdate-department-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  min-height: calc(100vh - 60px); // Adjust if there's a navbar/header
+  background-color: #f1f3f5;
+}
+
+.update-department-card {
+  background-color: #fff;
+  padding: 2.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 600px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.update-department-subtitle {
+  font-size: 1.75rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #212529;
+}
+
+.update-department-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+p {
+  text-align: center;
+  font-size: 1rem;
+  color: #495057;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
