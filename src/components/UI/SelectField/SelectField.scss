@@ -1,45 +1,43 @@
 .select-group {
   position: relative;
   margin-bottom: 2rem;
+  width: 100%;
 
   select {
     width: 100%;
-    padding: .8rem 0.75rem;
+    padding: 0.8rem 0.75rem;
     border: 1px solid #ccc;
     border-radius: 8px;
     font-size: 1rem;
     height: 3rem;
     outline: none;
-    background: transparent;
-    appearance: none; 
+    background-color: white;
+    appearance: none;
+    transition: border-color 0.3s ease;
 
     &:focus {
       border-color: rgb(0, 125, 125);
     }
 
-    &:focus + label,
-    &:not(:placeholder-shown) + label,
-    &:not([value=""]) + label {
-      top: -12px;
+    &:focus + .select-label,
+    &:not([value=""]) + .select-label {
+      top: -10px;
       left: 12px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: rgb(0, 125, 125);
       background-color: white;
-      padding: 0 5px;
-      font-weight: 100;
-
+      padding: 0 4px;
     }
   }
 
-  label {
+  .select-label {
     position: absolute;
     top: 1rem;
     left: 12px;
-      font-size: 0.8rem;
+    font-size: 0.9rem;
     color: #666;
     pointer-events: none;
-    
-    transition: 0.2s ease all;
     background-color: white;
+    transition: 0.2s ease all;
   }
 }

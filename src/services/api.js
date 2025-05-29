@@ -20,7 +20,11 @@ export const api = createApi({
   endpoints: (builder) => ({
     // 🔐 Login Admin
     login: builder.mutation({
-      query: (formData) => ({ url: "/admin/login", method: "POST", body: formData }),
+      query: (formData) => ({
+        url: "/admin/login",
+        method: "POST",
+        body: formData,
+      }),
       async onQueryStarted(_, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
@@ -50,7 +54,11 @@ export const api = createApi({
 
     // ➕ Add Department
     addDepartment: builder.mutation({
-      query: (formData) => ({ url: "/department", method: "POST", body: formData }),
+      query: (formData) => ({
+        url: "/department",
+        method: "POST",
+        body: formData,
+      }),
       invalidatesTags: ["Departments"],
     }),
 
@@ -74,7 +82,11 @@ export const api = createApi({
 
     // ✅ Update Department By ID
     updateDepartmentById: builder.mutation({
-      query: ({ id, payload }) => ({ url: `/department/${id}/edit`, method: "PUT", body: payload }),
+      query: ({ id, payload }) => ({
+        url: `/department/${id}/edit`,
+        method: "PUT",
+        body: payload,
+      }),
       invalidatesTags: (result, error, { id }) => [
         { type: "Departments", id },
         "Departments",
@@ -83,7 +95,11 @@ export const api = createApi({
 
     // ➕ Add Employee
     addEmployee: builder.mutation({
-      query: (formData) => ({ url: "/employee", method: "POST", body: formData }),
+      query: (formData) => ({
+        url: "/employee",
+        method: "POST",
+        body: formData,
+      }),
       invalidatesTags: ["Employees"],
     }),
 
@@ -106,13 +122,41 @@ export const api = createApi({
     }),
     // ✅ Update Employee By ID
     updateEmployeeById: builder.mutation({
-      query: ({ id, payload }) => ({ url: `/employee/${id}/edit`, method: "PUT", body: payload }),
+      query: ({ id, payload }) => ({
+        url: `/employee/${id}/edit`,
+        method: "PUT",
+        body: payload,
+      }),
       invalidatesTags: (result, error, { id }) => [
         { type: "Employees", id },
         "Employees",
       ],
-  }),
-  
+    }),
+
+    getEmployeeByDepartment: builder.query({
+      query: (id) => ({ url: `/employee/department/${id}`, method: "GET" }),
+      providesTags: (result, error, id) => [{ type: "Employees", id }],
+      keepUnusedDataFor: 0, // <-- disable cache immediately when unused
+    }),
+
+    // Add Salary
+    addSalary: builder.mutation({
+      query: (payload) => ({
+        url: "/salary/add",
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Employees"],
+    }),
+
+    // Get Employee Salary History by empID
+    // 📄 Get Employee By ID
+    getSalaryByEmpId: builder.query({
+      query: (empId) => ({ url: `/salary/${empId}/history`, method: "GET" }),
+      providesTags: (result, error, id) => [{ type: "Employees", id }],
+    
+    }),
+    
   }),
 });
 
@@ -130,4 +174,7 @@ export const {
   useGetEmployeeByIdQuery,
   useDeleteEmployeeByIdMutation,
   useUpdateEmployeeByIdMutation,
+  useGetEmployeeByDepartmentQuery,
+  useAddSalaryMutation,
+  useGetSalaryByEmpIdQuery,
 } = api;

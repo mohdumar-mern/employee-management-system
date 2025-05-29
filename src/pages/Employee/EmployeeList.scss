@@ -1,7 +1,7 @@
 .employee-list {
   padding: 2rem;
   margin-top: 2rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f9f9f9;
   min-height: 100vh;
 
@@ -37,16 +37,20 @@
 
   .employee-content {
     .table-container {
-      overflow-x: auto;
       background: #fff;
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      overflow-x: auto;  /* allows horizontal scroll if needed */
     }
 
     .employee-table {
       width: 100%;
       border-spacing: 0;
       min-width: 600px;
+
+      @media (max-width: 768px) {
+        min-width: auto;  /* removes fixed min-width on small screens for responsiveness */
+      }
 
       thead {
         background-color: #e5e7eb;
@@ -74,6 +78,7 @@
             border-bottom: 1px solid #e5e7eb;
             color: #4b5563;
             white-space: nowrap;
+            vertical-align: middle;
 
             .profile-image {
               width: 50px;
@@ -81,19 +86,7 @@
               border-radius: 50%;
               object-fit: cover;
               margin-right: 0.5rem;
-            }
-
-            .employee-name {
-              font-weight: 600;
-              color: #1f2937;
-            }
-
-            .employee-role {
-              color: #6b7280;
-            }
-
-            .employee-department {
-              color: #9ca3af;
+              vertical-align: middle;
             }
           }
         }
@@ -124,10 +117,14 @@
           &:nth-child(3) {
             color: #ef4444;
           }
+
+          &:nth-child(4) {
+            color: #f29224;
+          }
         }
       }
 
-      // Mobile / Tablet Responsive Styling
+      /* Mobile / Tablet Responsive Styling */
       @media (max-width: 768px) {
         thead {
           display: none;
@@ -149,8 +146,8 @@
 
         td {
           position: relative;
-          padding-left: 50%;
-          text-align: left;
+          padding-right: 50%;
+          text-align: right;
           white-space: normal;
           border: none;
 
@@ -167,7 +164,7 @@
         }
 
         .actions-cell {
-          justify-content: flex-start;
+          justify-content: flex-end;
           padding-left: 0;
         }
       }

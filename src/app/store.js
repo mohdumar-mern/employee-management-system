@@ -7,6 +7,7 @@ import { api } from "../services/api";
 import adminReducer from "../features/admin/adminSlice"
 import departmentReducer from "../features/department/departmentSlice"
 import employeeReducer from "../features/employee/employeeSlice"
+import salaryReducer from "../features/salary/salarySlice";
 
 const isDev = import.meta.env.VITE_NODE_ENV === "development";
 const logger = createLogger({
@@ -20,6 +21,7 @@ export const store = configureStore({
     admin: adminReducer,
     departments: departmentReducer,
     employees: employeeReducer,
+    salary: salaryReducer,
   },
   middleware: (getDefaultMiddleware) =>
     isDev

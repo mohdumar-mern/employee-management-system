@@ -16,6 +16,8 @@ import EmployeeList from "./pages/Employee/EmployeeList";
 import AddEmployee from "./pages/Employee/AddEmployee";
 import EmployeeDetail from "./pages/Employee/EmployeeDetail";
 import UpdateEmployee from "./pages/Employee/UpdateEmployee";
+import AddSalary from "./pages/Salary/AddSalary";
+import SalaryHistory from "./pages/Salary/SalaryHistory";
 
 function App() {
   return (
@@ -44,7 +46,8 @@ function App() {
             <Route path="departments/:id/edit" element={<UpdateDepartment />} />
 
             <Route path="leaves" element={<div>Leaves</div>} />
-            <Route path="salary" element={<div>Salary</div>} />
+            <Route path="salary/:empId/history" element={<SalaryHistory />} />
+            <Route path="salary/add" element={<AddSalary />} />
             <Route path="settings" element={<div>Settings</div>} />
           </Route>
         </Route>

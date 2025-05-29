@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Edit, Eye, Trash } from "lucide-react";
+import { Edit, Eye, HandCoins, Trash } from "lucide-react";
 import toast from "react-hot-toast";
 
 import InputField from "../../components/UI/Input/InputField";
@@ -83,10 +83,7 @@ const EmployeeList = () => {
     <>
       <Helmet>
         <title>Employees • Admin Panel</title>
-        <meta
-          name="description"
-          content="Manage employees in the admin panel."
-        />
+        <meta name="description" content="Manage employees in the admin panel." />
       </Helmet>
 
       <section className="employee-list">
@@ -110,10 +107,7 @@ const EmployeeList = () => {
           {isLoading ? (
             <p>Loading...</p>
           ) : isError ? (
-            <p>
-              Error loading employees:{" "}
-              {error?.data?.message || "Unknown error"}
-            </p>
+            <p>Error loading employees: {error?.data?.message || "Unknown error"}</p>
           ) : filteredEmployees.length > 0 ? (
             <div className="table-container">
               <table className="employee-table">
@@ -130,37 +124,30 @@ const EmployeeList = () => {
                 <tbody>
                   {filteredEmployees.map((emp, index) => (
                     <tr key={emp._id}>
-                      <td>{index + 1}</td>
-                      <td>
+                      <td data-label="#"> {index + 1} </td>
+                      <td data-label="Profile">
                         <img
-                          src={
-                            emp?.userId?.profile?.url ||
-                            "/default-profile.png"
-                          }
+                          src={emp?.userId?.profile?.url || "/default-profile.png"}
                           alt="Profile"
                           className="profile-image"
                         />
                       </td>
-                      <td>{emp.emp_name || "-"}</td>
-                      <td>{emp.department?.dep_name || "-"}</td>
-                      <td>{emp.userId?.name || "-"}</td>
-                      <td>
+                      <td data-label="Name">{emp.emp_name || "-"}</td>
+                      <td data-label="Department">{emp.department?.dep_name || "-"}</td>
+                      <td data-label="Created By">{emp.userId?.name || "-"}</td>
+                      <td data-label="Actions">
                         <div className="actions-cell">
                           <Button
                             title="Edit"
                             onClick={() =>
-                              navigate(
-                                `/admin-dashboard/employees/${emp._id}/edit`
-                              )
+                              navigate(`/admin-dashboard/employees/${emp._id}/edit`)
                             }
                             Icon={Edit}
                           />
                           <Button
                             title="View"
                             onClick={() =>
-                              navigate(
-                                `/admin-dashboard/employees/${emp._id}/view`
-                              )
+                              navigate(`/admin-dashboard/employees/${emp._id}/view`)
                             }
                             Icon={Eye}
                           />
@@ -168,6 +155,13 @@ const EmployeeList = () => {
                             title="Delete"
                             onClick={() => handleDelete(emp._id)}
                             Icon={Trash}
+                          />
+                          <Button
+                            title="Salary"
+                            onClick={() =>
+                              navigate(`/admin-dashboard/salary/${emp.empId}/history`)
+                            }
+                            Icon={HandCoins}
                           />
                         </div>
                       </td>
