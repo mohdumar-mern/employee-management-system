@@ -1,41 +1,21 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { useSelector, useDispatch } from "react-redux";
 
-import { useGetSalaryByEmpIdQuery } from "../../services/api";
-import { setSalary } from "../../features/salary/salarySlice";
+import { useGetSalaryQuery } from "../../services/api";
 
 import "./SalaryHistory.scss";
 import Button from "../../components/UI/Button/Button";
 
-const SalaryHistory = () => {
-  const dispatch = useDispatch();
+const SalaryList = () => {
   const navigate = useNavigate();
-  const { empId } = useParams();
 
   const {
-    data: salaryData,
+    data,
     isLoading,
     isError,
     error,
-  } = useGetSalaryByEmpIdQuery(empId, {
-    refetchOnMountOrArgChange: true,
-  });
-
-  const { salary: salaryFromStore = [] } = useSelector((state) => state.salary);
-
-  useEffect(() => {
-    if (salaryData?.salaries) {
-      dispatch(
-        setSalary({
-          salary: salaryData.salaries,
-          message: salaryData.message,
-          success: salaryData.success,
-        })
-      );
-    }
-  }, [salaryData, dispatch]);
+  } = useGetSalaryQuery(); // pass empId to query hook
 
   const addSalaryHandler = () => {
     navigate("/admin-dashboard/salary/add");
@@ -44,7 +24,7 @@ const SalaryHistory = () => {
   return (
     <>
       <Helmet>
-        <title>Salary History • Admin Panel</title>
+        <title>Salary List • Admin Panel</title>
         <meta name="description" content="View and manage salary history." />
       </Helmet>
 
@@ -58,8 +38,8 @@ const SalaryHistory = () => {
           {isLoading ? (
             <p>Loading...</p>
           ) : isError ? (
-            <p>Error: {error?.data?.message || "Unknown error"}</p>
-          ) : salaryFromStore.length > 0 ? (
+            <p>Error: {error?.message || "Unknown error"}</p>
+          ) : data?.salaries?.length > 0 ? (
             <div className="table-container">
               <table className="employee-table">
                 <thead>
@@ -74,15 +54,17 @@ const SalaryHistory = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {salaryFromStore.map((record, index) => (
+                  {data.salaries.map((record, index) => (
                     <tr key={record._id}>
-                      <td data-label="#"> {index + 1} </td>
+                      <td data-label="#">{index + 1}</td>
                       <td data-label="Emp ID">{record?.empId || "-"}</td>
                       <td data-label="Salary">{record.basicSalary}</td>
                       <td data-label="Allowances">{record.allowances}</td>
                       <td data-label="Deductions">{record.deductions}</td>
                       <td data-label="Total">{record.netSalary}</td>
-                      <td data-label="Pay Date">{new Date(record.payDate).toLocaleDateString()}</td>
+                      <td data-label="Pay Date">
+                        {new Date(record.payDate).toLocaleDateString()}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -97,4 +79,4 @@ const SalaryHistory = () => {
   );
 };
 
-export default SalaryHistory;
+export default SalaryList;

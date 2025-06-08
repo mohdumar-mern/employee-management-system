@@ -1,24 +1,24 @@
-// Sidebar.jsx
+// EmpSidebar.jsx
 import { useState } from "react";
 import {
   LogOut,
   LayoutDashboard,
-  Users,
   Menu,
   X,
   Calendar,
   HandCoins,
-  Landmark,
   Settings,
+  User,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { clearAdmin } from "../../../features/admin/adminSlice";
 import { useLogoutMutation } from "../../../services/api";
-import SidebarItem from "./SidebarItem/SidebarItem";
-import "./Sidebar.scss";
+import EmpSidebarItem from "./SidebarItem/EmpSidebarItem";
 
-const Sidebar = () => {
+import "./EmpSidebar.scss";
+
+const EmpSidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -39,11 +39,10 @@ const Sidebar = () => {
 
   const tabs = [
     { label: "Dashboard", icon: LayoutDashboard, path: "" },
-    { label: "Employees", icon: Users, path: "employees" },
-    { label: "Departments", icon: Landmark, path: "departments" },
-    { label: "Leaves", icon: Calendar, path: "leaves" },
-    { label: "Salary", icon: HandCoins, path: "salary" },
-    { label: "Setting", icon: Settings, path: id ? `${id}/settings` : "settings" },
+    { label: "My Profile", icon: User, path: id ? `${id}/profile` : "profile" },
+    { label: "Leave", icon: Calendar, path: "leave" },
+    { label: "Salary", icon: HandCoins, path: id ? `${id}/salary` : "salary" },
+    { label: "Setting", icon: Settings, path: id ? `${id}/setting` : "setting" },
   ];
 
   const toggleSidebar = () => setIsOpen((prev) => !prev);
@@ -60,7 +59,7 @@ const Sidebar = () => {
           <h2 className="sidebar-title">Admin Panel</h2>
           <nav className="sidebar-nav">
             {tabs.map(({ label, icon, path }) => (
-              <SidebarItem key={label} to={path} icon={icon} label={label} onClick={closeSidebar} />
+              <EmpSidebarItem key={label} to={path} icon={icon} label={label} onClick={closeSidebar} />
             ))}
           </nav>
         </div>
@@ -81,4 +80,10 @@ const Sidebar = () => {
   );
 };
 
-export default Sidebar;
+export default EmpSidebar;
+
+
+
+
+
+

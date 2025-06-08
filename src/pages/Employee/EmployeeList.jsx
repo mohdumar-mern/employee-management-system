@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Edit, Eye, HandCoins, Trash } from "lucide-react";
+import { Edit, Eye, HandCoins, LogOut, Trash } from "lucide-react";
 import toast from "react-hot-toast";
 
 import InputField from "../../components/UI/Input/InputField";
@@ -38,6 +38,7 @@ const EmployeeList = () => {
   const { employees: employeesData = [] } = useSelector(
     (state) => state.employees
   );
+  console.log(employeesData)
 
   // Sync API data to Redux
   useEffect(() => {
@@ -62,22 +63,7 @@ const EmployeeList = () => {
     );
   }, [employeesData, searchTerm]);
 
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this employee?"
-    );
-    if (confirmDelete) {
-      try {
-        await deleteEmployee(id).unwrap();
-        dispatch(removeEmployee(id));
-        toast.success("Employee deleted successfully");
-        refetch();
-      } catch (err) {
-        console.error("Delete failed", err);
-        toast.error("Failed to delete employee");
-      }
-    }
-  };
+
 
   return (
     <>
@@ -151,18 +137,19 @@ const EmployeeList = () => {
                             }
                             Icon={Eye}
                           />
-                          <Button
-                            title="Delete"
-                            onClick={() => handleDelete(emp._id)}
-                            Icon={Trash}
-                          />
-                          <Button
+                            <Button
                             title="Salary"
                             onClick={() =>
                               navigate(`/admin-dashboard/salary/${emp.empId}/history`)
                             }
                             Icon={HandCoins}
                           />
+                          <Button
+                            title="Leaves"
+                            onClick={() => navigate(`/admin-dashboard/employees/${emp._id}/leaves`)}
+                            Icon={LogOut}
+                          />
+                        
                         </div>
                       </td>
                     </tr>

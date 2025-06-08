@@ -3,29 +3,30 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useSelector, useDispatch } from "react-redux";
 
-import { useGetSalaryByEmpIdQuery } from "../../services/api";
-import { setSalary } from "../../features/salary/salarySlice";
+import { useGetSalaryByEmpIdQuery } from "../../../services/api";
+import { setSalary } from "../../../features/salary/salarySlice";
 
 import "./SalaryHistory.scss";
-import Button from "../../components/UI/Button/Button";
+import Button from "../../../components/UI/Button/Button";
 
-const SalaryHistory = () => {
+const EmpSalaryHistory = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { empId } = useParams();
+  const { id } = useParams();
 
   const {
     data: salaryData,
     isLoading,
     isError,
     error,
-  } = useGetSalaryByEmpIdQuery(empId, {
+  } = useGetSalaryByEmpIdQuery(id, {
     refetchOnMountOrArgChange: true,
   });
 
   const { salary: salaryFromStore = [] } = useSelector((state) => state.salary);
 
   useEffect(() => {
+    // ✅ Corrected condition key from `salary` to `salaries`
     if (salaryData?.salaries) {
       dispatch(
         setSalary({
@@ -37,9 +38,7 @@ const SalaryHistory = () => {
     }
   }, [salaryData, dispatch]);
 
-  const addSalaryHandler = () => {
-    navigate("/admin-dashboard/salary/add");
-  };
+
 
   return (
     <>
@@ -51,7 +50,6 @@ const SalaryHistory = () => {
       <section className="salary-list">
         <header className="salary-header">
           <h1 className="salary-title">Salary History</h1>
-          <Button onClick={addSalaryHandler} text="+ Add Salary" />
         </header>
 
         <div className="salary-content">
@@ -82,7 +80,9 @@ const SalaryHistory = () => {
                       <td data-label="Allowances">{record.allowances}</td>
                       <td data-label="Deductions">{record.deductions}</td>
                       <td data-label="Total">{record.netSalary}</td>
-                      <td data-label="Pay Date">{new Date(record.payDate).toLocaleDateString()}</td>
+                      <td data-label="Pay Date">
+                        {new Date(record.payDate).toLocaleDateString()}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -97,4 +97,4 @@ const SalaryHistory = () => {
   );
 };
 
-export default SalaryHistory;
+export default EmpSalaryHistory;

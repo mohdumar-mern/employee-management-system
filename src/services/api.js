@@ -1,6 +1,6 @@
+// src/services/api.js
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-// ✅ Custom baseQuery with token from localStorage
 const baseQueryWithAuth = fetchBaseQuery({
   baseUrl: "http://localhost:5000/api",
   credentials: "include",
@@ -16,9 +16,9 @@ const baseQueryWithAuth = fetchBaseQuery({
 export const api = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithAuth,
-  tagTypes: ["Departments", "Employees"],
+  tagTypes: ["Departments", "Employees", "Leaves", "Salary"],
   endpoints: (builder) => ({
-    // 🔐 Login Admin
+    // Admin Auth
     login: builder.mutation({
       query: (formData) => ({
         url: "/admin/login",
@@ -33,12 +33,11 @@ export const api = createApi({
             localStorage.setItem("adminToken", data.token);
           }
         } catch (error) {
-          console.error("Login failed:", error);
+          console.error(error);
         }
       },
     }),
 
-    // 🚪 Logout Admin
     logout: builder.mutation({
       query: () => ({ url: "/admin/logout", method: "GET" }),
       async onQueryStarted(_, { queryFulfilled }) {
@@ -47,40 +46,49 @@ export const api = createApi({
           localStorage.removeItem("adminInfo");
           localStorage.removeItem("adminToken");
         } catch (error) {
-          console.error("Logout failed:", error);
+          console.error(error);
         }
       },
     }),
+    // admin forgot password
+    adminForgotPassword: builder.mutation({
+      query: ({  id, oldPassword, newPassword }) => ({
+        url: `/admin/${id}/forgot-password`,
+        method: "PUT",
+        body: { oldPassword, newPassword },
+      }),
+    }),
 
-    // ➕ Add Department
+    // Employee Forgot Password
+    forgotPassword: builder.mutation({
+      query: ({ id, formData }) => ({
+        url: `/user/${id}/forgot-password`,
+        method: "PUT",
+        body: formData,
+      }),
+    }),
+
+    // Department APIs
     addDepartment: builder.mutation({
-      query: (formData) => ({
+      query: (payload) => ({
         url: "/department",
         method: "POST",
-        body: formData,
+        body: payload,
       }),
       invalidatesTags: ["Departments"],
     }),
-
-    // 📄 Get All Departments
     getDepartments: builder.query({
       query: () => ({ url: "/department", method: "GET" }),
       providesTags: ["Departments"],
     }),
-
-    // 📄 Get Department By ID
     getDepartmentById: builder.query({
       query: (id) => ({ url: `/department/${id}/view`, method: "GET" }),
       providesTags: (result, error, id) => [{ type: "Departments", id }],
     }),
-
-    // ❌ Delete Department By ID
     deleteDepartmentById: builder.mutation({
       query: (id) => ({ url: `/department/${id}/delete`, method: "DELETE" }),
       invalidatesTags: ["Departments"],
     }),
-
-    // ✅ Update Department By ID
     updateDepartmentById: builder.mutation({
       query: ({ id, payload }) => ({
         url: `/department/${id}/edit`,
@@ -93,34 +101,23 @@ export const api = createApi({
       ],
     }),
 
-    // ➕ Add Employee
+    // Employee APIs
     addEmployee: builder.mutation({
-      query: (formData) => ({
-        url: "/employee",
-        method: "POST",
-        body: formData,
-      }),
+      query: (payload) => ({ url: "/employee", method: "POST", body: payload }),
       invalidatesTags: ["Employees"],
     }),
-
-    // 📄 Get All Employees
     getEmployees: builder.query({
       query: () => ({ url: "/employee", method: "GET" }),
       providesTags: ["Employees"],
     }),
-
-    // 📄 Get Employee By ID
     getEmployeeById: builder.query({
       query: (id) => ({ url: `/employee/${id}/view`, method: "GET" }),
       providesTags: (result, error, id) => [{ type: "Employees", id }],
     }),
-
-    // ❌ Delete Employee By ID
     deleteEmployeeById: builder.mutation({
       query: (id) => ({ url: `/employee/${id}/delete`, method: "DELETE" }),
       invalidatesTags: ["Employees"],
     }),
-    // ✅ Update Employee By ID
     updateEmployeeById: builder.mutation({
       query: ({ id, payload }) => ({
         url: `/employee/${id}/edit`,
@@ -132,49 +129,104 @@ export const api = createApi({
         "Employees",
       ],
     }),
-
     getEmployeeByDepartment: builder.query({
-      query: (id) => ({ url: `/employee/department/${id}`, method: "GET" }),
-      providesTags: (result, error, id) => [{ type: "Employees", id }],
-      keepUnusedDataFor: 0, // <-- disable cache immediately when unused
+      query: (depId) => ({
+        url: `/employee/department/${depId}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, depId) => [
+        { type: "Employees", id: depId },
+      ],
+      keepUnusedDataFor: 0,
     }),
 
-    // Add Salary
+    // Salary APIs
+    getSalary: builder.query({
+      query: () => ({ url: "/salary", method: "GET" }),
+      providesTags: ["Salaries"],
+    }),
     addSalary: builder.mutation({
       query: (payload) => ({
         url: "/salary/add",
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Employees"],
+      invalidatesTags: ["Salary"],
     }),
-
-    // Get Employee Salary History by empID
-    // 📄 Get Employee By ID
     getSalaryByEmpId: builder.query({
       query: (empId) => ({ url: `/salary/${empId}/history`, method: "GET" }),
-      providesTags: (result, error, id) => [{ type: "Employees", id }],
-    
+      providesTags: (result, error, empId) => [{ type: "Salary", id: empId }],
     }),
-    
+
+    // Leave APIs
+    addLeave: builder.mutation({
+      query: (payload) => ({
+        url: "/leave/add",
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Leaves"],
+    }),
+    getLeaveHistory: builder.query({
+      query: () => ({ url: "/leave/employee", method: "GET" }),
+      providesTags: ["Leaves"],
+    }),
+    getAdminAllLeaves: builder.query({
+      query: () => ({ url: "/leave", method: "GET" }),
+      providesTags: ["Leaves"],
+    }),
+    getLeaveById: builder.query({
+      query: (id) => ({ url: `/leave/${id}/view`, method: "GET" }),
+      providesTags: (result, error, id) => [{ type: "leave", id }],
+    }),
+    updateLeaveStatus: builder.mutation({
+      query: ({ id, status }) => ({
+        url: `/leave/${id}/update-status`,
+        method: "PUT",
+        body: { status },
+      }),
+      invalidatesTags: ["Leaves"],
+    }),
+    getEmployeeLeavesByEmployeeId: builder.query({
+      query: (id) => ({ url: `/leave/${id}/leaves`, method: "GET" }),
+      providesTags: (result, error, id) => [{ type: "Leaves", id }],
+    }),
+
+    dashboardSummary: builder.query({
+      query: () => ({url: "/dashboard/summary", method: "GET"}),
+    })
   }),
 });
 
-// ✅ Exporting RTK Query hooks
 export const {
   useLoginMutation,
   useLogoutMutation,
+  useAdminForgotPasswordMutation,
+
+  useForgotPasswordMutation,
   useAddDepartmentMutation,
   useGetDepartmentsQuery,
   useGetDepartmentByIdQuery,
   useDeleteDepartmentByIdMutation,
   useUpdateDepartmentByIdMutation,
+
   useAddEmployeeMutation,
   useGetEmployeesQuery,
   useGetEmployeeByIdQuery,
   useDeleteEmployeeByIdMutation,
   useUpdateEmployeeByIdMutation,
   useGetEmployeeByDepartmentQuery,
+
+  useGetSalaryQuery,
   useAddSalaryMutation,
   useGetSalaryByEmpIdQuery,
+
+  useAddLeaveMutation,
+  useGetLeaveHistoryQuery,
+  useGetAdminAllLeavesQuery,
+  useGetLeaveByIdQuery,
+  useUpdateLeaveStatusMutation,
+  useGetEmployeeLeavesByEmployeeIdQuery,
+
+  useDashboardSummaryQuery
 } = api;

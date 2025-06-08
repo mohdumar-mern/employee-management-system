@@ -49,7 +49,6 @@ const UpdateEmployee = () => {
         salary,
         userId: { role } = {},
       } = employeeData.employee;
-      console.log("employee:", employeeData.employee);
       setFormData({
         name: emp_name || "",
         maritalStatus: maritalStatus || "",

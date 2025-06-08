@@ -5,17 +5,15 @@ import { useDispatch } from "react-redux";
 
 import "./LoginPage.scss";
 import InputField from "../../components/UI/Input/InputField";
-import { useLoginMutation, } from "../../services/api";
+import { useLoginMutation } from "../../services/api";
 import { setAdmin } from "../../features/admin/adminSlice";
 import Button from "../../components/UI/Button/Button";
 
-
 const LoginPage = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   const [login, { isLoading: isLoginLoading }] = useLoginMutation();
- 
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [message, setMessage] = useState({ text: "", type: "" });
@@ -32,10 +30,16 @@ const LoginPage = () => {
       const res = await login(formData).unwrap();
 
       if (res.success && res.user && res.token) {
-       
-        dispatch(setAdmin({user: res.user, token: res.token}))
+        dispatch(setAdmin({ user: res.user, token: res.token }));
         setMessage({ text: res.message, type: "success" });
-        navigate("/admin-dashboard");
+        if (res.user.role === "admin") {
+          navigate("/admin-dashboard");
+        } else if (res.user.role === "employee") {
+          navigate("/employee-dashboard")
+        }
+        else {
+          navigate("/not-found");
+        }
       } else {
         setMessage({ text: res.message || "Login failed", type: "error" });
       }
@@ -45,7 +49,6 @@ const LoginPage = () => {
       setMessage({ text: msg, type: "error" });
     }
   };
-
 
   return (
     <main className="login-page">
@@ -59,7 +62,7 @@ const LoginPage = () => {
         <h2 className="login-subtitle">Admin Login</h2>
 
         <form className="login-form" onSubmit={handleSubmit}>
-            {message.text && (
+          {message.text && (
             <p
               style={{
                 color: message.type === "error" ? "red" : "green",
@@ -90,19 +93,9 @@ const LoginPage = () => {
           />
 
           <div className="form-actions">
-            <Button
-              type="submit"
-              disabled={isLoginLoading}
-              text ="Login"
-            />
-
+            <Button type="submit" disabled={isLoginLoading} text="Login" />
           </div>
-
-        
         </form>
-
-       
-      
       </section>
     </main>
   );
