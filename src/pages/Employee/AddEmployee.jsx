@@ -101,8 +101,8 @@ const AddEmployee = () => {
       toast.success("Employee added successfully!");
       navigate(-1); // go back to list
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to add employee.");
+      console.error(err.data.error);
+      toast.error(err.data.error);
     }
   };
 

@@ -1,28 +1,51 @@
 import { Helmet } from "react-helmet-async";
 import {
   UserCircle,
-  Activity,
   CheckCircle,
   Mail,
   Building2,
   Wallet,
   CalendarDays,
 } from "lucide-react";
+
 import "./DashboardHome.scss";
 
 import { useSelector } from "react-redux";
 import { useDashboardSummaryQuery } from "../../../services/api";
+import Spinner from "../../../components/UI/spinner/Spinner";
 
 const DashboardHome = () => {
   const { adminInfo } = useSelector((state) => state.admin);
-  const { data, isLoading, error } = useDashboardSummaryQuery();
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+  } = useDashboardSummaryQuery();
 
   if (isLoading) {
-    return <div className="loader">Loading dashboard summary...</div>;
+    return (
+      <div
+        className="loader-wrapper"
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+      >
+        <Spinner />
+        <span className="visually-hidden">Loading dashboard summary...</span>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="error">Failed to load dashboard data.</div>;
+    return (
+      <div className="error" role="alert" aria-live="assertive">
+        <p>Oops! Unable to load dashboard data.</p>
+        <button onClick={() => refetch()} className="retry-button">
+          Retry
+        </button>
+      </div>
+    );
   }
 
   const {
@@ -47,16 +70,35 @@ const DashboardHome = () => {
           name="description"
           content={`Dashboard overview for ${adminInfo?.name || "Admin"}`}
         />
-        <meta name="robots" content="noindex,nofollow" />
+        {/* Change noindex only if you want to hide from search */}
+        <meta name="robots" content="index,follow" />
+        <meta name="author" content="Admin Dashboard Team" />
+        <meta property="og:title" content="Admin Dashboard" />
+        <meta
+          property="og:description"
+          content={`Admin summary for ${adminInfo?.name || "Admin"}`}
+        />
+        <meta
+          property="og:image"
+          content={adminInfo?.profile?.url || "/default-avatar.png"}
+        />
       </Helmet>
 
-      <section className="dashboard-home" aria-labelledby="dashboard-heading">
+      <section
+        className="dashboard-home"
+        aria-labelledby="dashboard-heading"
+      >
         <header className="dashboard-heading" id="dashboard-heading">
           <figure className="avatar" aria-hidden="true">
             <img
               src={adminInfo?.profile?.url || "/default-avatar.png"}
               alt={`${adminInfo?.name || "Admin"}’s profile photo`}
               className="avatar-img"
+              loading="lazy"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "/default-avatar.png";
+              }}
             />
           </figure>
           <div className="avatar-text">
@@ -84,7 +126,7 @@ const DashboardHome = () => {
         >
           <div className="card blue" tabIndex={0}>
             <UserCircle className="icon" />
-            <div>
+            <div className="card1">
               <h3>Total Employees</h3>
               <span>{totalEmployees}</span>
             </div>
@@ -122,7 +164,7 @@ const DashboardHome = () => {
             <CheckCircle className="icon" />
             <div>
               <h3>Approved</h3>
-              <pspan>{approved}</pspan>
+              <span>{approved}</span>
             </div>
           </div>
           <div className="card red" tabIndex={0}>
@@ -140,8 +182,6 @@ const DashboardHome = () => {
             </div>
           </div>
         </div>
-
-      
       </section>
     </>
   );

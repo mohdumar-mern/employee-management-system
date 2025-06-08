@@ -1,82 +1,93 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useDispatch } from "react-redux";
 
 import "./LoginPage.scss";
 import InputField from "../../components/UI/Input/InputField";
-import { useLoginMutation } from "../../services/api";
-import { setAdmin } from "../../features/admin/adminSlice";
 import Button from "../../components/UI/Button/Button";
 
-const LoginPage = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+import { useLoginMutation } from "../../services/api";
+import { setAdmin } from "../../features/admin/adminSlice";
 
-  const [login, { isLoading: isLoginLoading }] = useLoginMutation();
+const LoginPage = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const [message, setMessage] = useState({ text: "", type: "" });
+  const [message, setMessage] = useState(null);
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+  const [login, { isLoading }] = useLoginMutation();
+
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage({ text: "", type: "" });
+    setMessage(null);
 
     try {
       const res = await login(formData).unwrap();
 
       if (res.success && res.user && res.token) {
         dispatch(setAdmin({ user: res.user, token: res.token }));
-        setMessage({ text: res.message, type: "success" });
-        if (res.user.role === "admin") {
-          navigate("/admin-dashboard");
-        } else if (res.user.role === "employee") {
-          navigate("/employee-dashboard")
-        }
-        else {
-          navigate("/not-found");
-        }
+        setMessage({ type: "success", text: res.message });
+
+        const roleRedirects = {
+          admin: "/admin-dashboard",
+          employee: "/employee-dashboard",
+        };
+
+        navigate(roleRedirects[res.user.role] || "/unauthorized");
       } else {
-        setMessage({ text: res.message || "Login failed", type: "error" });
+        throw new Error(res.message || "Login failed");
       }
-    } catch (err) {
-      const msg =
-        err?.data?.error || err?.error || "An unexpected error occurred";
-      setMessage({ text: msg, type: "error" });
+    } catch (error) {
+      const errMsg =
+        error?.data?.error ||
+        error?.error ||
+        error.message ||
+        "An unexpected error occurred";
+      setMessage({ type: "error", text: errMsg });
     }
   };
 
   return (
     <main className="login-page">
       <Helmet>
-        <title>Login | Employee Management</title>
-        <meta name="description" content="Login securely to the portal." />
+        <title>Login | Employee Management System</title>
+        <meta
+          name="description"
+          content="Login securely to your employee or admin dashboard."
+        />
+        <link rel="canonical" href="https://yourdomain.com/login" />
       </Helmet>
 
-      <section className="login-card">
-        <h1 className="login-title">Employee Management</h1>
-        <h2 className="login-subtitle">Admin Login</h2>
+      <section className="login-card" aria-labelledby="login-heading">
+        <h1 id="login-heading" className="login-title">
+          Employee Management
+        </h1>
+        <h2 className="login-subtitle">Welcome back, please log in</h2>
 
-        <form className="login-form" onSubmit={handleSubmit}>
-          {message.text && (
+        <form className="login-form" onSubmit={handleSubmit} noValidate>
+          {message && (
             <p
-              style={{
-                color: message.type === "error" ? "red" : "green",
-                marginTop: "1rem",
-              }}
+              role="alert"
+              className={`login-message ${message.type}`}
+              aria-live="assertive"
             >
               {message.text}
             </p>
           )}
+
           <InputField
             label="Email"
             type="email"
             name="email"
-            placeholder="admin@example.com"
+            autoComplete="email"
+            placeholder="you@example.com"
             value={formData.email}
             onChange={handleChange}
             required
@@ -86,14 +97,20 @@ const LoginPage = () => {
             label="Password"
             type="password"
             name="password"
-            placeholder="••••••••"
+            autoComplete="current-password"
+            placeholder="Enter your password"
             value={formData.password}
             onChange={handleChange}
             required
           />
 
           <div className="form-actions">
-            <Button type="submit" disabled={isLoginLoading} text="Login" />
+            <Button
+              type="submit"
+              className="btn--block"
+              disabled={isLoading}
+              text={isLoading ? "Logging in..." : "Login"}
+            />
           </div>
         </form>
       </section>

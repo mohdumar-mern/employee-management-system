@@ -12,17 +12,15 @@
   transition: background-color 0.3s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
-  // &.btn--block {
-  //   width: 100%;
-  //   max-width: 300px;
-  // }
+  &.btn--block {
+    width: 100%;
+  }
 
   &:hover {
     background-color: #005f5f;
   }
 
   @media (max-width: 600px) {
-    padding: 1.5rem 1rem;
 
     .login-button {
       width: 100%;

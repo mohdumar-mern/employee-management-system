@@ -18,6 +18,7 @@ import {
 } from "../../features/employee/employeeSlice";
 
 import "./EmployeeList.scss";
+import Spinner from "../../components/UI/spinner/Spinner";
 
 const EmployeeList = () => {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ const EmployeeList = () => {
   const { employees: employeesData = [] } = useSelector(
     (state) => state.employees
   );
-  console.log(employeesData)
+  console.log(employeesData);
 
   // Sync API data to Redux
   useEffect(() => {
@@ -63,19 +64,24 @@ const EmployeeList = () => {
     );
   }, [employeesData, searchTerm]);
 
-
-
   return (
     <>
       <Helmet>
         <title>Employees • Admin Panel</title>
-        <meta name="description" content="Manage employees in the admin panel." />
+        <meta
+          name="description"
+          content="Manage employees in the admin panel."
+        />
       </Helmet>
 
       <section className="employee-list">
         <header className="employee-header">
-          <h1 className="employee-title">Manage Employees</h1>
           <div className="employee-actions">
+            <h1 className="employee-title">Manage Employees</h1>
+
+            <Button onClick={addEmployee} text="+ Add Employee" />
+          </div>
+          <div className="search-box">
             <InputField
               type="text"
               label="Search Employees"
@@ -85,15 +91,24 @@ const EmployeeList = () => {
               onChange={handleChange}
               required={false}
             />
-            <Button onClick={addEmployee} text="+ Add Employee" />
           </div>
         </header>
 
         <div className="employee-content">
           {isLoading ? (
-            <p>Loading...</p>
+            <div
+              className="loader-wrapper"
+              role="status"
+              aria-live="polite"
+              aria-busy="true"
+            >
+              <Spinner />
+              <span className="visually-hidden">Loading Employees...</span>
+            </div>
           ) : isError ? (
-            <p>Error loading employees: {error?.data?.message || "Unknown error"}</p>
+            <p>
+              Error loading employees: {error?.data?.message || "Unknown error"}
+            </p>
           ) : filteredEmployees.length > 0 ? (
             <div className="table-container">
               <table className="employee-table">
@@ -113,43 +128,56 @@ const EmployeeList = () => {
                       <td data-label="#"> {index + 1} </td>
                       <td data-label="Profile">
                         <img
-                          src={emp?.userId?.profile?.url || "/default-profile.png"}
+                          src={
+                            emp?.userId?.profile?.url || "/default-profile.png"
+                          }
                           alt="Profile"
                           className="profile-image"
                         />
                       </td>
                       <td data-label="Name">{emp.emp_name || "-"}</td>
-                      <td data-label="Department">{emp.department?.dep_name || "-"}</td>
+                      <td data-label="Department">
+                        {emp.department?.dep_name || "-"}
+                      </td>
                       <td data-label="Created By">{emp.userId?.name || "-"}</td>
                       <td data-label="Actions">
                         <div className="actions-cell">
                           <Button
                             title="Edit"
                             onClick={() =>
-                              navigate(`/admin-dashboard/employees/${emp._id}/edit`)
+                              navigate(
+                                `/admin-dashboard/employees/${emp._id}/edit`
+                              )
                             }
                             Icon={Edit}
                           />
                           <Button
                             title="View"
                             onClick={() =>
-                              navigate(`/admin-dashboard/employees/${emp._id}/view`)
+                              navigate(
+                                `/admin-dashboard/employees/${emp._id}/view`
+                              )
                             }
                             Icon={Eye}
                           />
-                            <Button
+                          <Button
                             title="Salary"
                             onClick={() =>
-                              navigate(`/admin-dashboard/salary/${emp.empId}/history`)
+                              navigate(
+                                `/admin-dashboard/salary/${emp.empId}/history`
+                              )
                             }
                             Icon={HandCoins}
                           />
                           <Button
                             title="Leaves"
-                            onClick={() => navigate(`/admin-dashboard/employees/${emp._id}/leaves`)}
+                            onClick={() =>
+                              navigate(
+                                `/admin-dashboard/employees/${emp._id}/leaves`
+                              )
+                            }
                             Icon={LogOut}
                           />
-                        
                         </div>
                       </td>
                     </tr>

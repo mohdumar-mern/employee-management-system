@@ -1,5 +1,5 @@
 // Sidebar.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LogOut,
   LayoutDashboard,
@@ -49,9 +49,25 @@ const Sidebar = () => {
   const toggleSidebar = () => setIsOpen((prev) => !prev);
   const closeSidebar = () => setIsOpen(false);
 
+  // Close sidebar on window resize if screen is large (to keep sidebar open)
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768) {
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <>
-      <button className="sidebar-toggle" onClick={toggleSidebar} aria-label="Toggle sidebar">
+      {/* Show toggle button only on small screens */}
+      <button
+        className="sidebar-toggle"
+        onClick={toggleSidebar}
+        aria-label="Toggle sidebar"
+      >
         {isOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
 
@@ -60,7 +76,13 @@ const Sidebar = () => {
           <h2 className="sidebar-title">Admin Panel</h2>
           <nav className="sidebar-nav">
             {tabs.map(({ label, icon, path }) => (
-              <SidebarItem key={label} to={path} icon={icon} label={label} onClick={closeSidebar} />
+              <SidebarItem
+                key={label}
+                to={path}
+                icon={icon}
+                label={label}
+                onClick={closeSidebar}
+              />
             ))}
           </nav>
         </div>

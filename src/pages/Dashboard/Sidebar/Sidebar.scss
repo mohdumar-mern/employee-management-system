@@ -4,7 +4,6 @@ $sidebar-text: #ffffff;
 $sidebar-hover: #34495e;
 $active-bg: #1abc9c;
 $sidebar-width: 250px;
-
 $active-text: #ffffff;
 
 // Toggle button for mobile
@@ -14,43 +13,65 @@ $active-text: #ffffff;
   top: 1rem;
   left: 1rem;
   z-index: 1100;
-  background-color: $sidebar-bg;
-  color: white;
+  background-color: $sidebar-hover;
+  color: $sidebar-text;
   border: none;
   padding: 0.5rem;
   border-radius: 4px;
   cursor: pointer;
 }
 
-// Sidebar
+// Sidebar base
 .sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: $sidebar-width;
+  height: 100vh; // Fixed full height
   background-color: $sidebar-bg;
   color: $sidebar-text;
   display: flex;
   flex-direction: column;
   padding: 1.5rem 1rem;
   box-sizing: border-box;
-  min-height: 100vh;
-  transition: transform 0.3s ease-in-out;
-  position: relative;
+  overflow-y: auto; // 💡 This enables vertical scroll
+  z-index: 1000;
 
   .sidebar-title {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     font-weight: bold;
     margin-top: 3rem;
     margin-bottom: 2rem;
     color: $active-bg;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .sidebar-nav {
-    flex: 1;
     display: flex;
     flex-direction: column;
+    gap: 1rem;
+
+    a {
+      color: $sidebar-text;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+
+      &:hover {
+        background-color: $sidebar-hover;
+      }
+
+      &.active {
+        background-color: $active-bg;
+        color: $active-text;
+      }
+    }
   }
 
   .sidebar-logout {
     margin-top: auto;
+    margin-bottom: 4rem;
 
     .logout-button {
       background: transparent;
@@ -71,6 +92,11 @@ $active-text: #ffffff;
       &:hover {
         color: #c0392b;
       }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
     }
   }
 }
@@ -82,14 +108,8 @@ $active-text: #ffffff;
   }
 
   .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: $sidebar-width;
     transform: translateX(-100%);
-    z-index: 1000;
-    margin-bottom: 0;
+    transition: transform 0.3s ease-in-out;
 
     &.open {
       transform: translateX(0);
