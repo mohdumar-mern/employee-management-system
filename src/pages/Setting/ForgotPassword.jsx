@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { toast } from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 
-import "./ForgotPassword.scss";
-
 import InputField from "../../components/UI/Input/InputField";
 import Button from "../../components/UI/Button/Button";
+import Spinner from "../../components/UI/spinner/Spinner";
 
 import { useAdminForgotPasswordMutation } from "../../services/api";
+
+import "../Login/LoginPage.scss";
 
 const AdminForgotPassword = () => {
   const navigate = useNavigate();
@@ -20,53 +21,53 @@ const AdminForgotPassword = () => {
     confirmNewPassword: "",
   });
 
-  const [forgotPassword, { isLoading: isForgotLoading }] = useAdminForgotPasswordMutation();
+  const [forgotPassword, { isLoading }] = useAdminForgotPasswordMutation();
 
   useEffect(() => {
     if (!id) {
-      toast.error("User ID not found in URL");
+      toast.error("Invalid user. Redirecting...");
       navigate("/not-found");
     }
   }, [id, navigate]);
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const { oldPassword, newPassword, confirmNewPassword } = formData;
 
     if (!oldPassword || !newPassword || !confirmNewPassword) {
-      toast.error("All fields are required");
+      toast.error("All fields are required.");
       return;
     }
 
     if (newPassword !== confirmNewPassword) {
-      toast.error("New password and confirmation do not match");
+      toast.error("New passwords do not match.");
       return;
     }
 
     try {
-      const res = await forgotPassword({ id, oldPassword, newPassword }).unwrap();
+      const response = await forgotPassword({ id, oldPassword, newPassword }).unwrap();
 
-      if (res?.success) {
+      if (response?.success) {
         toast.success("Password changed successfully!");
         navigate("/admin-dashboard");
       } else {
-        toast.error(res?.message || "Password change failed.");
+        toast.error(response?.message || "Password change failed.");
       }
     } catch (err) {
-      toast.error(err?.data?.error || "An error occurred while changing the password");
+      const errorMsg = err?.data?.error || "An unexpected error occurred.";
+      toast.error(errorMsg);
     }
   };
 
   return (
     <main className="forgot-password-page">
       <Helmet>
-        <title>Change Password | Employee Management</title>
+        <title>Change Password • Admin Panel</title>
         <meta name="description" content="Change your password securely." />
       </Helmet>
 
@@ -74,12 +75,12 @@ const AdminForgotPassword = () => {
         <h1 className="forgot-password-title">Employee Management</h1>
         <h2 className="forgot-password-subtitle">Change Password</h2>
 
-        <form className="forgot-password-form" onSubmit={handleSubmit}>
+        <form className="forgot-password-form" onSubmit={handleSubmit} autoComplete="off">
           <InputField
             label="Old Password"
             type="password"
             name="oldPassword"
-            placeholder="••••••••"
+            placeholder="Enter your current password"
             value={formData.oldPassword}
             onChange={handleChange}
             required
@@ -89,7 +90,7 @@ const AdminForgotPassword = () => {
             label="New Password"
             type="password"
             name="newPassword"
-            placeholder="••••••••"
+            placeholder="Enter a new password"
             value={formData.newPassword}
             onChange={handleChange}
             required
@@ -99,7 +100,7 @@ const AdminForgotPassword = () => {
             label="Confirm New Password"
             type="password"
             name="confirmNewPassword"
-            placeholder="••••••••"
+            placeholder="Re-enter new password"
             value={formData.confirmNewPassword}
             onChange={handleChange}
             required
@@ -108,11 +109,17 @@ const AdminForgotPassword = () => {
           <div className="form-actions">
             <Button
               type="submit"
-              disabled={isForgotLoading}
-              text={isForgotLoading ? "Changing..." : "Change Password"}
+              text={isLoading ? "Changing..." : "Change Password"}
+              disabled={isLoading}
             />
           </div>
         </form>
+
+        {isLoading && (
+          <div className="spinner-overlay">
+            <Spinner />
+          </div>
+        )}
       </section>
     </main>
   );

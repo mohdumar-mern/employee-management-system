@@ -7,7 +7,7 @@ import InputField from "../../components/UI/Input/InputField";
 import Button from "../../components/UI/Button/Button";
 import { useGetAdminAllLeavesQuery } from "../../services/api";
 
-import "./AdminLeaveList.scss";
+import "../Employee/EmployeeList.scss";
 
 const AdminLeaveList = () => {
   const navigate = useNavigate();
@@ -20,8 +20,6 @@ const AdminLeaveList = () => {
     error,
   } = useGetAdminAllLeavesQuery();
 
-  console.log(leaveData)
-
   const leave = leaveData?.data || [];
 
   const handleChange = (e) => setSearchTerm(e.target.value);
@@ -31,31 +29,41 @@ const AdminLeaveList = () => {
     return leave.filter((lea) => {
       const emp = lea.employeeId || {};
       return (
-        String(emp.empId || "").toLowerCase().includes(lowerSearch) ||
-        String(emp.emp_name || "").toLowerCase().includes(lowerSearch) ||
-        String(emp.department?.dep_name || "").toLowerCase().includes(lowerSearch) ||
-        String(lea.leaveType || "").toLowerCase().includes(lowerSearch) ||
-        String(lea.status || "").toLowerCase().includes(lowerSearch)
-      ); 
+        emp.emp_name?.toLowerCase().includes(lowerSearch) ||
+        emp.department?.dep_name?.toLowerCase().includes(lowerSearch) ||
+        lea.leaveType?.toLowerCase().includes(lowerSearch) ||
+        lea.status?.toLowerCase().includes(lowerSearch)
+      );
     });
   }, [leave, searchTerm]);
+
+  const calculateDays = (start, end) => {
+    if (!start || !end) return "-";
+    const diff = (new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24);
+    return `${Math.ceil(diff) + 1}`;
+  };
 
   return (
     <>
       <Helmet>
-        <title>Leaves • Admin Panel</title>
-        <meta name="description" content="Manage employee leaves in the admin panel." />
+        <title>Manage Leaves • Admin Panel</title>
+        <meta
+          name="description"
+          content="Admin panel to manage and review employee leave applications including department, type, duration, and status."
+        />
       </Helmet>
 
       <section className="employee-list">
         <header className="employee-header">
-          <h1 className="employee-title">Manage Leaves</h1>
           <div className="employee-actions">
+            <h1 className="employee-title">Manage Employee Leaves</h1>
+          </div>
+          <div className="search-box">
             <InputField
               type="text"
               label="Search Leaves"
               name="leave"
-              placeholder="Search by employee name, ID, or department"
+              placeholder="Search by employee name, ID, department, type or status"
               value={searchTerm}
               onChange={handleChange}
             />
@@ -64,16 +72,17 @@ const AdminLeaveList = () => {
 
         <div className="employee-content">
           {isLoading ? (
-            <p>Loading...</p>
+            <p>Loading leave records...</p>
           ) : isError ? (
-            <p>Error loading leaves: {error?.data?.message || "Unknown error"}</p>
+            <p className="error-message">
+              Error loading leaves: {error?.data?.message || "Unknown error"}
+            </p>
           ) : filteredLeaves.length > 0 ? (
             <div className="table-container">
               <table className="employee-table">
                 <thead>
                   <tr>
-                    <th>Sr No.</th>
-                    <th>Emp ID</th>
+                    <th>#</th>
                     <th>Name</th>
                     <th>Leave Type</th>
                     <th>Department</th>
@@ -88,27 +97,25 @@ const AdminLeaveList = () => {
                     return (
                       <tr key={lea._id}>
                         <td data-label="#">{index + 1}</td>
-                        <td data-label="Emp ID">{emp.empId || "-"}</td>
                         <td data-label="Name">{emp.emp_name || "-"}</td>
                         <td data-label="Leave Type">{lea.leaveType || "-"}</td>
-                        <td data-label="Department">{emp.department?.dep_name || "-"}</td>
+                        <td data-label="Department">
+                          {emp.department?.dep_name || "-"}
+                        </td>
                         <td data-label="Days">
-                          {lea.startDate && lea.endDate
-                            ? Math.ceil(
-                                (new Date(lea.endDate) - new Date(lea.startDate)) /
-                                  (1000 * 60 * 60 * 24)
-                              ) + 1
-                            : "-"}
+                          {calculateDays(lea.startDate, lea.endDate)}
                         </td>
                         <td data-label="Status">{lea.status || "-"}</td>
-                        <td data-label="Actions">
+                        <td data-label="Action">
                           <div className="actions-cell">
                             <Button
-                              title="View"
-                              onClick={() =>
-                                navigate(`/admin-dashboard/leave/${lea._id}/view`)
-                              }
+                              title="View Leave"
                               Icon={Eye}
+                              onClick={() =>
+                                navigate(
+                                  `/admin-dashboard/leave/${lea._id}/view`
+                                )
+                              }
                             />
                           </div>
                         </td>

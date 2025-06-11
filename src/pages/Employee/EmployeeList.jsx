@@ -2,11 +2,12 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Edit, Eye, HandCoins, LogOut, Trash } from "lucide-react";
+import { Edit, Eye, HandCoins, LogOut } from "lucide-react";
 import toast from "react-hot-toast";
 
 import InputField from "../../components/UI/Input/InputField";
 import Button from "../../components/UI/Button/Button";
+import Spinner from "../../components/UI/spinner/Spinner";
 
 import {
   useGetEmployeesQuery,
@@ -18,20 +19,17 @@ import {
 } from "../../features/employee/employeeSlice";
 
 import "./EmployeeList.scss";
-import Spinner from "../../components/UI/spinner/Spinner";
 
 const EmployeeList = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch employees from API
   const {
     data: employeesDataFromApi,
     isLoading,
     isError,
     error,
-    refetch,
   } = useGetEmployeesQuery();
 
   const [deleteEmployee] = useDeleteEmployeeByIdMutation();
@@ -39,11 +37,10 @@ const EmployeeList = () => {
   const { employees: employeesData = [] } = useSelector(
     (state) => state.employees
   );
-  console.log(employeesData);
 
   // Sync API data to Redux
   useEffect(() => {
-    if (employeesDataFromApi?.employees?.length > 0) {
+    if (employeesDataFromApi?.employees?.length) {
       dispatch(
         setEmployees({
           employees: employeesDataFromApi.employees,
@@ -59,8 +56,13 @@ const EmployeeList = () => {
   const addEmployee = () => navigate("/admin-dashboard/employees/add");
 
   const filteredEmployees = useMemo(() => {
-    return employeesData.filter((emp) =>
-      emp.emp_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    const term = searchTerm.toLowerCase();
+    return employeesData.filter(
+      (emp) =>
+        emp.emp_name?.toLowerCase().includes(term) ||
+        emp.empId?.toLowerCase().includes(term) ||
+        emp.userId?.email?.toLowerCase().includes(term) ||
+        emp.department?.dep_name?.toLowerCase().includes(term)
     );
   }, [employeesData, searchTerm]);
 
@@ -70,7 +72,7 @@ const EmployeeList = () => {
         <title>Employees • Admin Panel</title>
         <meta
           name="description"
-          content="Manage employees in the admin panel."
+          content="Manage employee details, departments, and access in the admin dashboard."
         />
       </Helmet>
 
@@ -78,7 +80,6 @@ const EmployeeList = () => {
         <header className="employee-header">
           <div className="employee-actions">
             <h1 className="employee-title">Manage Employees</h1>
-
             <Button onClick={addEmployee} text="+ Add Employee" />
           </div>
           <div className="search-box">
@@ -86,10 +87,9 @@ const EmployeeList = () => {
               type="text"
               label="Search Employees"
               name="employee"
-              placeholder="Search by employee name"
+              placeholder="Search by name, ID, department, or email"
               value={searchTerm}
               onChange={handleChange}
-              required={false}
             />
           </div>
         </header>
@@ -106,7 +106,7 @@ const EmployeeList = () => {
               <span className="visually-hidden">Loading Employees...</span>
             </div>
           ) : isError ? (
-            <p>
+            <p className="error-message">
               Error loading employees: {error?.data?.message || "Unknown error"}
             </p>
           ) : filteredEmployees.length > 0 ? (
@@ -125,13 +125,14 @@ const EmployeeList = () => {
                 <tbody>
                   {filteredEmployees.map((emp, index) => (
                     <tr key={emp._id}>
-                      <td data-label="#"> {index + 1} </td>
+                      <td data-label="#">{index + 1}</td>
                       <td data-label="Profile">
                         <img
                           src={
-                            emp?.userId?.profile?.url || "/default-profile.png"
+                            emp?.userId?.profile?.url ||
+                            "/default-profile.png"
                           }
-                          alt="Profile"
+                          alt={`${emp.emp_name || "Employee"} Profile`}
                           className="profile-image"
                         />
                       </td>
@@ -139,44 +140,46 @@ const EmployeeList = () => {
                       <td data-label="Department">
                         {emp.department?.dep_name || "-"}
                       </td>
-                      <td data-label="Created By">{emp.userId?.name || "-"}</td>
+                      <td data-label="Created By">
+                        {emp.userId?.name || "-"}
+                      </td>
                       <td data-label="Actions">
                         <div className="actions-cell">
                           <Button
                             title="Edit"
+                            Icon={Edit}
                             onClick={() =>
                               navigate(
                                 `/admin-dashboard/employees/${emp._id}/edit`
                               )
                             }
-                            Icon={Edit}
                           />
                           <Button
                             title="View"
+                            Icon={Eye}
                             onClick={() =>
                               navigate(
                                 `/admin-dashboard/employees/${emp._id}/view`
                               )
                             }
-                            Icon={Eye}
                           />
                           <Button
-                            title="Salary"
+                            title="Salary History"
+                            Icon={HandCoins}
                             onClick={() =>
                               navigate(
                                 `/admin-dashboard/salary/${emp.empId}/history`
                               )
                             }
-                            Icon={HandCoins}
                           />
                           <Button
-                            title="Leaves"
+                            title="Leave Records"
+                            Icon={LogOut}
                             onClick={() =>
                               navigate(
                                 `/admin-dashboard/employees/${emp._id}/leaves`
                               )
                             }
-                            Icon={LogOut}
                           />
                         </div>
                       </td>

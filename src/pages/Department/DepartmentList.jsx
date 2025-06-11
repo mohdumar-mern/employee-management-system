@@ -2,18 +2,16 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  useGetDepartmentsQuery,
-  useDeleteDepartmentByIdMutation,
-} from "../../services/api";
-import { Edit, Eye, Trash } from "lucide-react";
+import { useGetDepartmentsQuery, useDeleteDepartmentByIdMutation } from "../../services/api";
 
+import { Edit, Eye, Trash } from "lucide-react";
 import InputField from "../../components/UI/Input/InputField";
 import Button from "../../components/UI/Button/Button";
 import { setDepartments } from "../../features/department/departmentSlice";
 import toast from "react-hot-toast";
 
 import "./DepartmentList.scss";
+import Spinner from "../../components/UI/spinner/Spinner";
 
 const DepartmentList = () => {
   const navigate = useNavigate();
@@ -22,9 +20,9 @@ const DepartmentList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { data, isLoading, error, refetch } = useGetDepartmentsQuery();
   const [deleteDepartment] = useDeleteDepartmentByIdMutation();
+  const { dept } = useSelector((state) => state.departments);
 
   const departments = useMemo(() => data?.departments || [], [data]);
-  const { dept } = useSelector((state) => state.departments);
 
   useEffect(() => {
     if (departments.length > 0) {
@@ -32,24 +30,22 @@ const DepartmentList = () => {
     }
   }, [departments, dispatch]);
 
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
-
-  const handleChange = (e) => setSearchTerm(e.target.value);
-  const addDepartment = () => navigate("/admin-dashboard/departments/add");
+  const handleSearchChange = (e) => setSearchTerm(e.target.value);
 
   const filteredDepartments = dept.filter((dep) =>
     dep.dep_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this department?"
-    );
-    if (confirmDelete) {
+    if (window.confirm("Are you sure you want to delete this department?")) {
       try {
         await deleteDepartment(id).unwrap();
         toast.success("Department deleted successfully");
-        refetch(); // ✅ Refetch after deletion
+        refetch();
       } catch (err) {
         console.error("Delete failed", err);
         toast.error("Failed to delete department");
@@ -57,43 +53,46 @@ const DepartmentList = () => {
     }
   };
 
-  useEffect(() =>{
-    refetch()
-  }, [refetch])
+  const handleAdd = () => navigate("/admin-dashboard/departments/add");
 
   return (
     <>
       <Helmet>
-        <title>Departments • Admin Panel</title>
+        <title>Manage Departments • Admin Panel</title>
         <meta
           name="description"
-          content="Manage departments: search, view, and add new departments in the admin panel."
+          content="Easily manage, search, add, and delete departments from the admin dashboard."
         />
       </Helmet>
 
       <section className="department-list">
         <header className="department-header">
-          <h1 className="department-title">Manage Departments</h1>
           <div className="department-actions">
+            <h1 className="department-title">Manage Departments</h1>
+            <Button onClick={handleAdd} text="+ Add Department" />
+          </div>
+
+          <div className="search-box">
             <InputField
               type="text"
               label="Search Departments"
-              name="department"
+              name="search"
               placeholder="Search by department name"
               value={searchTerm}
-              onChange={handleChange}
+              onChange={handleSearchChange}
               required={false}
             />
-            <Button onClick={addDepartment} text="+ Add Department" />
           </div>
         </header>
 
         <div className="department-content">
           {isLoading ? (
-            <p>Loading...</p>
+            <Spinner />
           ) : error ? (
-            <p>Error loading departments</p>
-          ) : filteredDepartments.length > 0 ? (
+            <p role="alert">Failed to load departments. Please try again.</p>
+          ) : filteredDepartments.length === 0 ? (
+            <p className="no-department-message">No departments found.</p>
+          ) : (
             <div className="table-container">
               <table className="department-table">
                 <thead>
@@ -107,35 +106,29 @@ const DepartmentList = () => {
                 <tbody>
                   {filteredDepartments.map((dep, index) => (
                     <tr key={dep._id}>
-                      <td data-label="#"> {index + 1} </td>
-                      <td data-label="Department Name"> {dep.dep_name} </td>
-                      <td data-label="Created By">
-                        {dep.created_by?.name || "-"}
-                      </td>
+                      <td data-label="#">{index + 1}</td>
+                      <td data-label="Department Name">{dep.dep_name}</td>
+                      <td data-label="Created By">{dep.created_by?.name || "-"}</td>
                       <td data-label="Actions">
                         <div className="actions-cell">
                           <Button
-                            title="Edit"
+                            title="Edit Department"
                             onClick={() =>
-                              navigate(
-                                `/admin-dashboard/departments/${dep._id}/edit`
-                              )
+                              navigate(`/admin-dashboard/departments/${dep._id}/edit`)
                             }
                             Icon={Edit}
                           />
                           <Button
-                            title="View"
+                            title="View Department"
                             onClick={() =>
-                              navigate(
-                                `/admin-dashboard/departments/${dep._id}/view`
-                              )
+                              navigate(`/admin-dashboard/departments/${dep._id}/view`)
                             }
                             Icon={Eye}
                           />
                           <Button
-                            title="Delete"
-                            Icon={Trash}
+                            title="Delete Department"
                             onClick={() => handleDelete(dep._id)}
+                            Icon={Trash}
                           />
                         </div>
                       </td>
@@ -144,8 +137,6 @@ const DepartmentList = () => {
                 </tbody>
               </table>
             </div>
-          ) : (
-            <p className="no-department-message">No departments found.</p>
           )}
         </div>
       </section>
